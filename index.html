@@ -29,7 +29,7 @@ body{margin:0;min-height:100vh;color:var(--fg);background-color:var(--bg);backgr
 .torn{margin:0;border-radius:0;box-shadow:none;transform:none;padding:14px 12px 22px;-webkit-mask:linear-gradient(#000 0 0) top/100% calc(100% - 9px) no-repeat,conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/18px 9px repeat-x;mask:linear-gradient(#000 0 0) top/100% calc(100% - 9px) no-repeat,conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/18px 9px repeat-x}
 .torn::after{display:none}
 .card h2{font:700 21px/1.2 Kalam,'Comic Sans MS',cursive;margin:0 0 4px}label.ck b{font:700 20px/1.2 Kalam,'Comic Sans MS',cursive}
-.paper{background:#fff;box-shadow:0 1px 3px var(--sh);overflow:hidden}.paper svg{display:block;width:100%;height:auto}
+.paper{background:transparent}.paper svg{box-shadow:0 1px 3px var(--sh);background:#fff}.paper svg{display:block;width:100%;height:auto}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px 12px;margin-top:8px}
 .it{border-top:1.5px dashed var(--ln);padding-top:8px}
 label{display:flex;flex-direction:column;font-size:12px;gap:2px;opacity:.95}
@@ -54,7 +54,7 @@ body{height:100vh;height:100dvh;padding:8px max(10px,env(safe-area-inset-right))
 .layout{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
 .layout>*,.grid>*{min-width:0}
 input,select,textarea{min-width:0;max-width:100%}
-.left{flex:0 0 48%;min-height:0;display:flex;flex-direction:column}
+.left{flex:0 0 55%;min-height:0;display:flex;flex-direction:column}
 .right{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:0 4px 24px}
 .tabs,.seg{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;max-width:100%}
 .tabs{position:sticky;top:0;z-index:5;background:var(--bg)}
@@ -67,13 +67,14 @@ label.wide{grid-column:1/-1}
 .torn{flex:1;min-height:0;display:flex;padding:8px 8px 16px}
 .paper{flex:1;min-height:0;display:flex;justify-content:center;align-items:center;cursor:zoom-in}
 .paper svg{width:auto;height:100%;max-width:100%}
-.actions{margin:4px 0 0}.row.actions button{padding:9px}
+.actions{margin:4px 0 0}.row.actions button{padding:9px 4px;font-size:13px}
 #msg{font-size:13px;color:var(--teal);min-height:16px;margin-top:4px}
 #warn{margin:0 4px}
 .tornwrap.full{position:fixed;inset:0;z-index:50;margin:0;padding:10px;background:var(--bg);overflow:auto;display:block;filter:none}
 .tornwrap.full::before{display:none}
 .tornwrap.full .torn{display:block;-webkit-mask:none;mask:none}
 .tornwrap.full .paper{display:block;cursor:zoom-out}
+.tornwrap.full .paper::before{content:'Ketuk gambar untuk menutup';display:block;font:12px system-ui;color:#666;text-align:center;padding:2px 0 6px}
 .tornwrap.full .paper svg{width:100%;height:auto;max-width:none}
 @media (min-width:900px){.layout{flex-direction:row;gap:14px}.left{flex:1.1 1 0}.right{flex:.9 1 0;min-width:400px}.hero b{font-size:23px}}
 </style></head><body><div class="wrap">
@@ -81,9 +82,9 @@ label.wide{grid-column:1/-1}
 <div class="layout">
 <section class="left">
 <div id="viewbar"></div>
-<div class="tornwrap"><div class="card torn"><div class="paper" id="paper" onclick="this.closest('.tornwrap').classList.toggle('full')"></div></div></div>
+<div class="tornwrap"><div class="card torn"><div class="paper" id="paper" onclick="togglePv()"></div></div></div>
 <div id="warn"></div>
-<div class="row actions"><button class="y" onclick="saveDraw()">Simpan</button><button onclick="exp('jpg')">Unduh JPG</button><button class="c" onclick="exp('pdf')">Unduh PDF</button></div>
+<div class="row actions"><button class="y" onclick="saveDraw()">Simpan</button><button onclick="togglePv()">Hasil</button><button onclick="exp('jpg')">JPG</button><button class="c" onclick="exp('pdf')">PDF</button></div>
 <div id="msg"></div>
 </section>
 <section class="right"><div class="tabs" id="tabs"></div><div id="panel"></div></section>
@@ -92,15 +93,15 @@ label.wide{grid-column:1/-1}
 <script>
 const NS='http://www.w3.org/2000/svg',ORD=['bawah','balok','apit','atas'],NM={bawah:'Papan Bawah',balok:'Balok',apit:'Papan Apit',atas:'Papan Atas'};
 const IT=(spec,n,o)=>({spec,n,slots:'',color:'#e1bd1f',...o});
-const fresh=()=>({cust:'PT. CONTOH',A:0,B:0,nailTxt:'Paku biasa 2"',mode:'2d',az:45,el:35,L:{
+const fresh=()=>({cust:'PT. CONTOH',A:0,B:0,nailTxt:'Paku biasa 2"',mode:'2d',az:45,el:35,notesOn:1,notes:'Pallet Planer 4 sisi tidak berserabut\nPallet Bersih dari kulit kayu dan Jamur\nPallet tidak ada lubang serangga (dempul rapi selaras dngn warna kayu)\nKekeringan kayu / Kadar Air 20 %\nPallet Presisi, potongan dan paku lurus\nPallet sesuai Speksifikasi atau Drawing',ttd:{on:1,lok:'Sidoarjo',tgl:'',p:[{h:'Dibuat oleh',n:'',j:'Marketing'},{h:'Diperiksa oleh',n:'',j:'Koordinator'},{h:'Mengetahui,',n:'Dedy.S',j:'Kacab'}]},L:{
  bawah:{on:1,along:'X',gaps:'',grp:1,nail:2,nailE:2,items:[IT('2x10x110',3,{color:'#e6c08f'})]},
- balok:{on:1,along:'Y',gaps:'',grp:1,items:[IT('5x10x110',3,{color:'#6b4f2a'})],bm:'long',nx:3,ny:3,gdir:'kolom',gy:'',ord:'wtl',coak:'',cw:20,ch:5},
+ balok:{on:1,along:'Y',gaps:'',grp:1,kup:0,gv:0,gw:2,gd:1.5,gfollow:1,galong:'apit',items:[IT('5x10x110',3,{color:'#6b4f2a'})],bm:'long',nx:3,ny:3,gdir:'kolom',gy:'',ord:'wtl',coak:'',cw:20,ch:5},
  apit:{on:0,along:'Y',gaps:'',grp:1,nail:0,nailE:0,items:[IT('2x10x110',3,{color:'#8b6a2f'})]},
  atas:{on:1,along:'X',gaps:'',grp:1,nail:2,nailE:2,items:[IT('2x10x110',11)]}}});
-let S=fresh();try{const j=localStorage.getItem('palet-S2');if(j)S=Object.assign(fresh(),JSON.parse(j))}catch(e){}
-const KD={name:'CV MITRA DUNIA PALLETINDO',title:'DRAWING PALLET',addr:'Office : Ruko GrahaAnggrek Mas Regency A 10 Jl. Lingkar Barat – Buduran – Sidoarjo\nWorkShop : Jl. Kapten Jama’ari No. 33 Tempeh Lumajang\nTelp: 031 8070497, 8070579, Fax: 031 8070601\nWeb:www.palletkayupalletindo.com, Email: mdpsurabaya@gmail.com',logoL:'',logoR:''};
-let K={...KD},curId=null,TAB='umum';try{const j=localStorage.getItem('palet-kop');if(j)K={...KD,...JSON.parse(j)}}catch(e){}
-const saveK=()=>{try{localStorage.setItem('palet-kop',JSON.stringify(K))}catch(e){msg('Logo terlalu besar untuk disimpan di perangkat')}};
+let S=fresh();try{const j=localStorage.getItem('palet-S2');if(j){S=Object.assign(fresh(),JSON.parse(j));if(S.ttd&&S.ttd.p){if(S.ttd.p[0]&&S.ttd.p[0].n=='Setioto')S.ttd.p[0].n='';if(S.ttd.p[1]&&S.ttd.p[1].n=='Samsudin')S.ttd.p[1].n=''}}}catch(e){}
+const KD={name:'CV MITRA DUNIA PALLETINDO',title:'DRAWING PALLET',addr:'Office : Ruko GrahaAnggrek Mas Regency A 10 Jl. Lingkar Barat – Buduran – Sidoarjo\nWorkShop : Jl. Kapten Jama’ari No. 33 Tempeh Lumajang\nTelp: 031 8070497, 8070579, Fax: 031 8070601\nWeb:www.palletkayupalletindo.com, Email: mdpsurabaya@gmail.com',logoL:'data:image/jpeg;base64,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',logoR:'',lhL:64,lhR:64,nameSize:0,titleSize:24,subSize:0,sub:'PROVIDER ISPM#15 ID – 050',tag:'WOODEN PALLET - PACKAGING HOUSE - CONSULTANT'};
+let K={...KD},curId=null,TAB='umum',FULLV=false;try{const j=localStorage.getItem('palet-kop2');if(j){K={...KD,...JSON.parse(j)};if(+K.titleSize==28)K.titleSize=24}}catch(e){}
+const saveK=()=>{try{localStorage.setItem('palet-kop2',JSON.stringify(K))}catch(e){msg('Logo terlalu besar untuk disimpan di perangkat')}};
 function msg(t){const e=document.getElementById('msg');if(e){e.textContent=t;clearTimeout(msg.t);msg.t=setTimeout(()=>e.textContent='',3000)}}
 const HK='palet-history',hist=()=>{try{return JSON.parse(localStorage.getItem(HK)||'[]')}catch(e){return[]}},setHist=a=>{try{localStorage.setItem(HK,JSON.stringify(a))}catch(e){alert('Penyimpanan penuh, hapus riwayat lama.')}};
 const f=x=>+(+x).toFixed(1),esc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
@@ -112,8 +113,13 @@ function assign(items,N,byN){if(byN)N=items.reduce((a,b)=>a+Math.max(0,Math.roun
  items.forEach((it,i)=>String(it.slots||'').split(',').map(x=>parseInt(x)).filter(x=>x>=1&&x<=N).forEach(x=>{if(s[x-1]<0)s[x-1]=i}));
  if(byN)items.forEach((it,i)=>{let need=(Math.round(it.n)||0)-s.filter(v=>v==i).length;for(let k=0;k<N&&need>0;k++)if(s[k]<0){s[k]=i;need--}});
  const f0=Math.max(0,items.findIndex(it=>!String(it.slots||'').trim()));return s.map(v=>v<0?f0:v)}
-function lay(W,span,gs,grp,nm,wr){const n=W.length;if(!n)return[];grp=Math.max(1,Math.round(grp)||1);
- const u=[];for(let i=0;i<n;i+=grp)u.push(W.slice(i,i+grp));
+function assignG(items,nx,ny,byC){const N=nx*ny,s=Array(N).fill(-1),lines=byC?nx:ny,per=byC?ny:nx,cl=l=>Array.from({length:per},(_,k)=>l*per+k);
+ items.forEach((it,i)=>String(it.slots||'').toLowerCase().split(',').map(x=>x.trim()).filter(Boolean).forEach(t=>{let cs=[];
+  if(t=='pinggir')cs=[...cl(0),...(lines>1?cl(lines-1):[])];else if(t=='tengah'){for(let l=1;l<lines-1;l++)cs.push(...cl(l))}else{const x=parseInt(t);if(x>=1&&x<=N)cs=[x-1]}
+  cs.forEach(c=>{if(s[c]<0)s[c]=i})}));
+ items.forEach((it,i)=>{let need=(Math.round(it.n)||0)-s.filter(v=>v==i).length;for(let k=0;k<N&&need>0;k++)if(s[k]<0){s[k]=i;need--}});return s}
+function lay(W,span,gs,grp,nm,wr){const n=W.length;if(!n)return[];const u=[];
+ if(Array.isArray(grp)){let i=0;grp.forEach(c=>{if(c>0&&i<n){u.push(W.slice(i,i+c));i+=c}});if(i<n)u.push(W.slice(i))}else{grp=Math.max(1,Math.round(grp)||1);for(let i=0;i<n;i+=grp)u.push(W.slice(i,i+grp))}
  const m=u.length,tot=W.reduce((a,b)=>a+b,0),g=String(gs||'').split(',').map(x=>x.trim()).filter(x=>x!=='').map(Number).filter(x=>!isNaN(x));
  const gp=g.length?Array.from({length:m-1},(_,i)=>g[Math.min(i,g.length-1)]):(m>1?Array(m-1).fill((span-tot)/(m-1)):[]);
  const T=tot+gp.reduce((a,b)=>a+b,0);
@@ -121,18 +127,27 @@ function lay(W,span,gs,grp,nm,wr){const n=W.length;if(!n)return[];grp=Math.max(1
  let x=(g.length||m==1)?(span-T)/2:0;const o=[];
  u.forEach((c,i)=>{c.forEach(w=>{o.push(x);x+=w});x+=gp[i]||0});return o}
 const AL=k=>{const a=S.L[k].along;return a=='atas'?S.L.atas.along:a=='apit'?S.L.apit.along:a};
+const grpOf=(L,n)=>{const k=Math.max(1,Math.round(L.grp)||1),md=L.rm||'semua';if(k<2)return 1;
+ if(md=='pinggir'){const a=Math.min(k,Math.floor(n/2)),b=Math.min(k,n-a);return[a,...Array(Math.max(0,n-a-b)).fill(1),b].filter(x=>x>0)}
+ if(md=='tengah'){const kk=Math.min(k,n),st=Math.floor((n-kk)/2);return[...Array(st).fill(1),kk,...Array(Math.max(0,n-st-kk)).fill(1)]}
+ return k};
+const GR=()=>{const L=S.L.balok;return L.on&&L.bm!='grid'&&+L.gv?{w:+L.gw||2,d:+L.gd||1.5}:null};
 function model(){const wr=[],bx=[],dd={},zz={};let z=0;
  ORD.forEach(k=>{const L=S.L[k];dd[k]=L.on?L.items.map(it=>{const d=dims(it,L,k);if(!d)wr.push(`${NM[k]}: ukuran "${it.spec}" harus berformat 2x10x110`);return d}):[];
   const t=Math.max(0,...dd[k].filter(Boolean).map(d=>d.t));zz[k]=[z,z+t];z+=t});
  const lx=[],ly=[];ORD.forEach(k=>{const L=S.L[k];if(!L.on||(k=='balok'&&L.bm=='grid'))return;dd[k].forEach(d=>{if(d)(AL(k)=='X'?lx:ly).push(d.l)})});
  let A=+S.A>0?+S.A:(lx.length?Math.max(...lx):0),B=+S.B>0?+S.B:(ly.length?Math.max(...ly):0);if(!A)A=B||110;if(!B)B=A;
- ORD.forEach(k=>{const L=S.L[k],ds=dd[k];if(!L.on||ds.some(d=>!d))return;const it=L.items;
+ ['bawah','apit','balok','atas'].forEach(k=>{const L=S.L[k],ds=dd[k];if(!L.on||ds.some(d=>!d))return;const it=L.items;
   const base=i=>({k,i,c:it[i].color,z0:zz[k][0],z1:zz[k][0]+ds[i].t});
-  if(k=='balok'&&L.bm=='grid'){const byC=L.gdir!='baris',nx=Math.max(1,Math.round(L.nx)),ny=Math.max(1,Math.round(L.ny)),as=assign(it,byC?nx:ny,false),ix=(c,r)=>as[byC?c:r];
-   const cw=Array.from({length:nx},(_,c)=>Math.max(...Array.from({length:ny},(_,r)=>ds[ix(c,r)].w))),rl=Array.from({length:ny},(_,r)=>Math.max(...Array.from({length:nx},(_,c)=>ds[ix(c,r)].l)));
-   const xs=lay(cw,A,L.gaps,1,'Balok sumbu X',wr),ys=lay(rl,B,L.gy,1,'Balok sumbu Y',wr);
-   for(let c=0;c<nx;c++)for(let r=0;r<ny;r++){const i=ix(c,r),d=ds[i],x=xs[c]+(cw[c]-d.w)/2,y=ys[r]+(rl[r]-d.l)/2;bx.push({...base(i),al:'Y',x0:x,x1:x+d.w,y0:y,y1:y+d.l})}return}
-  const as=assign(it,0,true),Y=AL(k)=='Y',span=Y?A:B,oth=Y?B:A,st=lay(as.map(i=>ds[i].w),span,L.gaps,L.grp,NM[k],wr);
+  if(k=='balok'&&L.bm=='grid'){const byC=L.gdir!='baris',tot=it.reduce((a,b)=>a+Math.max(0,Math.round(b.n)||0),0),ga=L.galong||'apit',apb=bx.filter(q=>q.k=='apit'),fol=!!(+(L.gfollow??1)&&apb.length),alX=ga=='X'||(ga=='apit'&&apb.length>0&&apb[0].al=='X');
+   let nx=Math.max(1,Math.round(L.nx)||1),ny=Math.max(1,Math.round(L.ny)||1),rowC=null,colC=null;
+   if(fol){if(apb[0].al=='X'){rowC=apb.map(q=>(q.y0+q.y1)/2).sort((a,b)=>a-b);ny=rowC.length;nx=Math.max(1,Math.ceil(tot/ny))}else{colC=apb.map(q=>(q.x0+q.x1)/2).sort((a,b)=>a-b);nx=colC.length;ny=Math.max(1,Math.ceil(tot/nx))}}
+   const as=assignG(it,nx,ny,byC),ix=(c,r)=>as[byC?c*ny+r:r*nx+c],fxy=d=>alX?[d.l,d.w]:[d.w,d.l];
+   if(tot>nx*ny)wr.push(`Balok: jumlah qty ${tot} lebih banyak dari kolom x baris (${nx*ny})`);
+   const cw=Array.from({length:nx},(_,c)=>Math.max(1e-6,...Array.from({length:ny},(_,r)=>{const i=ix(c,r);return i<0?0:fxy(ds[i])[0]}))),rl=Array.from({length:ny},(_,r)=>Math.max(1e-6,...Array.from({length:nx},(_,c)=>{const i=ix(c,r);return i<0?0:fxy(ds[i])[1]})));
+   const kp=Math.max(0,+L.kup||0),xs=colC?colC.map((v,c)=>v-cw[c]/2):lay(cw,A-2*kp,L.gaps,1,'Balok sumbu X',wr).map(v=>v+kp),ys=rowC?rowC.map((v,r)=>v-rl[r]/2):lay(rl,B-2*kp,L.gy,1,'Balok sumbu Y',wr).map(v=>v+kp);
+   for(let c=0;c<nx;c++)for(let r=0;r<ny;r++){const i=ix(c,r);if(i<0)continue;const[fx,fy]=fxy(ds[i]),x=xs[c]+(cw[c]-fx)/2,y=ys[r]+(rl[r]-fy)/2;bx.push({...base(i),al:alX?'X':'Y',x0:x,x1:x+fx,y0:y,y1:y+fy})}return}
+  const as=assign(it,0,true),Y=AL(k)=='Y',span=Y?A:B,oth=Y?B:A,kp=Math.max(0,+L.kup||0),st=lay(as.map(i=>ds[i].w),span-2*kp,L.gaps,grpOf(L,as.length),NM[k],wr).map(v=>v+kp);
   as.forEach((i,s)=>{const d=ds[i],off=(oth-d.l)/2;if(d.l>oth+.05)wr.push(`${NM[k]}: panjang ${d.l} melebihi palet ${oth}`);
    bx.push({...base(i),al:AL(k),s,N:as.length,...(Y?{x0:st[s],x1:st[s]+d.w,y0:off,y1:off+d.l}:{y0:st[s],y1:st[s]+d.w,x0:off,x1:off+d.l})})})});
  const mx0=Math.min(0,...bx.map(r=>r.x0)),my0=Math.min(0,...bx.map(r=>r.y0));
@@ -150,8 +165,8 @@ function build(iv,T){let c=0;const o=[];iv.forEach(([a,b])=>{if(a-c>.05)o.push({
 const pick=(m,keys,ax)=>{const c=keys.map(k=>ivs(m,k,ax)),p=c.find(v=>v.length>1)||c.find(v=>v.length);return p?build(p,ax=='x'?m.A:m.B):[]};
 function chain(sg,s,pos,hor,len){const ln=`stroke="#444" stroke-width=".7"`;let o=hor?`<path d="M0 ${pos}H${len*s}" ${ln}/>`:`<path d="M${pos} 0V${len*s}" ${ln}/>`;
  [...new Set(sg.flatMap(g=>[g.a,g.b]))].forEach(t=>o+=hor?`<path d="M${t*s} ${pos-3}V${pos+3}" ${ln}/>`:`<path d="M${pos-3} ${t*s}H${pos+3}" ${ln}/>`);
- sg.forEach(g=>{const l=(g.b-g.a)*s,t=f(g.b-g.a),mid=(g.a+g.b)/2*s;if(hor?l<t.length*4.8+2:l<4)return;
-  o+=`<text font-size="9" fill="${g.gap?'#c0392b':'#111'}" ${hor?`x="${mid}" y="${pos+12}" text-anchor="middle"`:`x="${pos+6}" y="${mid+3}"`}>${t}</text>`});return o}
+ sg.forEach((g,gi)=>{const l=(g.b-g.a)*s,t=f(g.b-g.a),mid=(g.a+g.b)/2*s,sm=!hor&&l<9;if(hor?l<t.length*4.8+2:l<3)return;
+  o+=`<text font-size="${sm?7:9}" fill="${g.gap?'#c0392b':'#111'}" ${hor?`x="${mid}" y="${pos+12}" text-anchor="middle"`:`x="${pos+6+(sm&&gi%2?14:0)}" y="${mid+3}"`}>${t}</text>`});return o}
 function nailPts(m,r){const L=S.L[r.k];if(!L||!L.on||r.k=='balok')return[];const nn=(r.s==0||r.s==r.N-1)?(+L.nailE||0):(+L.nail||0);if(!(nn>0))return[];
  const sup=(r.k=='atas'&&S.L.apit.on&&m.bx.some(q=>q.k=='apit'))?'apit':'balok',o=[];
  m.bx.filter(q=>q.k==sup).forEach(q=>{const a0=Math.max(r.x0,q.x0),a1=Math.min(r.x1,q.x1),b0=Math.max(r.y0,q.y0),b1=Math.min(r.y1,q.y1);if(a1<=a0||b1<=b0)return;
@@ -162,7 +177,12 @@ function view(T,m,ox,oy,bw,bh){const{A,B}=m,H=m.H;
  const U=T=='side'?B:A,V=(T=='top'||T=='bottom')?B:H;if(!(U>0&&V>0))return'';
  const b0c=m.bx.find(r=>r.k=='balok'),hasC=!!(b0c&&coaks(b0c).length&&((T=='side'&&b0c.al=='Y')||(T=='front'&&b0c.al!='Y'))),s=Math.min((bw-80)/U,(bh-46-(hasC?26:0))/V);let o=`<g transform="translate(${ox+(bw-80-U*s)/2},${oy})">`;
  const rs=[...m.bx].sort((a,b)=>a.z0-b.z0);if(T=='bottom')rs.reverse();
- rs.forEach(r=>{const[a,b,c,d]=mp[T](r);o+=`<rect x="${a*s}" y="${c*s}" width="${(b-a)*s}" height="${(d-c)*s}" fill="${r.c}" stroke="#222" stroke-width=".7"/>`});
+ const gr=GR();
+ rs.forEach(r=>{const[a,b,c,d]=mp[T](r);o+=`<rect x="${a*s}" y="${c*s}" width="${(b-a)*s}" height="${(d-c)*s}" fill="${r.c}" stroke="#222" stroke-width=".7"/>`;
+  if(gr&&r.k=='balok'){const Y=r.al=='Y',cc=Y?(r.x0+r.x1)/2:(r.y0+r.y1)/2,g=Math.min(gr.w,(Y?r.x1-r.x0:r.y1-r.y0)*.9),dp=Math.min(gr.d,(r.z1-r.z0)*.9);
+   if((T=='front'&&Y)||(T=='side'&&!Y)){const nx0=(cc-g/2)*s,nx1=(cc+g/2)*s,ny0=(H-r.z0-dp)*s,ny1=(H-r.z0)*s;o+=`<rect x="${nx0}" y="${ny0}" width="${g*s}" height="${dp*s+.9}" fill="#fff"/><path d="M${nx0} ${ny1}V${ny0}H${nx1}V${ny1}${r.z0>.01?'Z':''}" fill="none" stroke="#222" stroke-width=".6"/>`}
+   if(T=='bottom')o+=Y?`<rect x="${(cc-g/2)*s}" y="${r.y0*s}" width="${g*s}" height="${(r.y1-r.y0)*s}" fill="#222" fill-opacity=".45"/>`:`<rect x="${r.x0*s}" y="${(cc-g/2)*s}" width="${(r.x1-r.x0)*s}" height="${g*s}" fill="#222" fill-opacity=".45"/>`}});
+ const g0=gr&&m.bx.find(r=>r.k=='balok');if(g0&&((T=='front'&&g0.al=='Y')||(T=='side'&&g0.al!='Y')))o+=`<text x="${(T=='front'?g0.x1:g0.y1)*s+4}" y="${(H-g0.z0)*s-3}" font-size="7.5" fill="#444">Alur tali ${f(gr.w)} x ${f(gr.d)}</text>`;
  m.bx.forEach(r=>coaks(r).forEach(q=>{const Y=r.al=='Y',u=q.a+(Y?r.y0:r.x0);
   if((T=='side'&&Y)||(T=='front'&&!Y))o+=`<polygon points="${arch(u,q.w,q.h).map(([a,z])=>`${a*s},${(H-r.z0-z)*s}`).join(' ')}" fill="#fff" stroke="#222" stroke-width=".7"/>`;
   if(T=='bottom')o+=Y?`<rect x="${r.x0*s}" y="${u*s}" width="${(r.x1-r.x0)*s}" height="${q.w*s}" fill="url(#hz)" stroke="#222" stroke-width=".5"/>`:`<rect x="${u*s}" y="${r.y0*s}" width="${q.w*s}" height="${(r.y1-r.y0)*s}" fill="url(#hz)" stroke="#222" stroke-width=".5"/>`}));
@@ -171,20 +191,20 @@ function view(T,m,ox,oy,bw,bh){const{A,B}=m,H=m.H;
   o+=`<path d="M${st*s} ${yb}V${yl}M${u0*s} ${yb}V${yl}M${(u0+q.w)*s} ${yb}V${yl}" ${ex}/>`+(q.a>0?seg(st,u0,q.a):'')+seg(u0,u0+q.w,q.w);
   const hx=(u0+q.w*.25)*s,ht=(H-b0c.z0-q.h)*s;o+=`<path d="M${hx} ${yb}V${ht}M${hx-3} ${ht}H${hx+3}" ${ln}/><text x="${hx+4}" y="${(yb+ht)/2+3}" font-size="8.5" fill="#111">${f(q.h)}</text>`});
  if(T=='top'||T=='bottom')o+=`<g transform="scale(${s})">${nails(m,T=='top'?'atas':'bawah',s)}</g>`;
- const PX=['balok','bawah','atas','apit'],YT=['atas','balok','apit','bawah'],YB=['bawah','balok','apit','atas'];
+ const PT=['atas','apit','balok','bawah'],PB=['bawah','balok','apit','atas'];
  const stack=ORD.filter(k=>m.zz[k][1]>m.zz[k][0]).map(k=>({a:H-m.zz[k][1],b:H-m.zz[k][0],gap:0}));
- const sx=T=='top'||T=='bottom'||T=='front'?pick(m,PX,'x'):pick(m,YT,'y'),sy=T=='top'?pick(m,YT,'y'):T=='bottom'?pick(m,YB,'y'):stack;
+ const sx=T=='bottom'?pick(m,PB,'x'):T=='side'?pick(m,PT,'y'):pick(m,PT,'x'),sy=T=='top'?pick(m,PT,'y'):T=='bottom'?pick(m,PB,'y'):stack;
  o+=chain(sx,s,V*s+8,true,U)+chain([{a:0,b:U,gap:0}],s,V*s+32,true,U)+chain(sy,s,U*s+8,false,V)+chain([{a:0,b:V,gap:0}],s,U*s+46,false,V);
  return o+'</g>'}
-function iso(m,ox0,oy0,bw,bh){const{A,B}=m,H=m.H;if(!(H>0))return'';
- const th=S.az*Math.PI/180,ph=S.el*Math.PI/180,sT=Math.sin(th),cT=Math.cos(th),sP=Math.sin(ph),cP=Math.cos(ph),d=[sT*cP,cT*cP,sP];
+function iso(m,ox0,oy0,bw,bh,op){op=op||{};const{A,B}=m,H=m.H;if(!(H>0))return'';const dims=op.dims!==false,by0=oy0;if(op.call){oy0+=58;bh-=58}
+ const th=(op.az??S.az)*Math.PI/180,ph=(op.el??S.el)*Math.PI/180,sT=Math.sin(th),cT=Math.cos(th),sP=Math.sin(ph),cP=Math.cos(ph),d=[sT*cP,cT*cP,sP];
  const pr=(x,y,z)=>[-(x*cT-y*sT),(x*sT+y*cT)*sP-z*cP];
  const cxp=d[0]>0?A:0,cyp=d[1]>0?B:0,gx=cxp?1:-1,gy=cyp?1:-1,off=.07*Math.max(A,B),o2=off*2.2;
- const cs=[[0,0,0],[A,0,0],[0,B,0],[A,B,0],[0,0,H],[A,0,H],[0,B,H],[A,B,H],[0,cyp+gy*o2,0],[A,cyp+gy*o2,0],[cxp+gx*o2,0,0],[cxp+gx*o2,B,0]].map(p=>pr(...p));
+ const cs=[[0,0,0],[A,0,0],[0,B,0],[A,B,0],[0,0,H],[A,0,H],[0,B,H],[A,B,H]].concat(dims?[[0,cyp+gy*o2,0],[A,cyp+gy*o2,0],[cxp+gx*o2,0,0],[cxp+gx*o2,B,0]]:[]).map(p=>pr(...p));
  const mnx=Math.min(...cs.map(c=>c[0])),mxx=Math.max(...cs.map(c=>c[0])),mny=Math.min(...cs.map(c=>c[1])),mxy=Math.max(...cs.map(c=>c[1]));
- const mg=50,s=Math.min((bw-2*mg)/(mxx-mnx),(bh-2*mg)/(mxy-mny)),ox=ox0+mg-mnx*s+(bw-2*mg-(mxx-mnx)*s)/2,oy=oy0+mg-mny*s+(bh-2*mg-(mxy-mny)*s)/2;
+ const mgx=dims?50:6,mgy=dims?32:6,s=Math.min((bw-2*mgx)/(mxx-mnx),(bh-2*mgy)/(mxy-mny)),ox=ox0+mgx-mnx*s+(bw-2*mgx-(mxx-mnx)*s)/2,oy=oy0+mgy-mny*s+(bh-2*mgy-(mxy-mny)*s)/2;
  const P=(x,y,z)=>{const[a,b]=pr(x,y,z);return(ox+a*s).toFixed(1)+','+(oy+b*s).toFixed(1)};
- const sep=(a0,a1,b0,b1,dv)=>a1<=b0+1e-6?(dv>0?1:-1):b1<=a0+1e-6?(dv>0?-1:1):0;
+ const sep=(a0,a1,b0,b1,dv)=>Math.abs(dv)<1e-9?0:a1<=b0+1e-6?(dv>0?1:-1):b1<=a0+1e-6?(dv>0?-1:1):0;
  const bef=(a,b)=>sep(a.x0,a.x1,b.x0,b.x1,d[0])||sep(a.y0,a.y1,b.y0,b.y1,d[1])||sep(a.z0,a.z1,b.z0,b.z1,d[2]);
  const n=m.bx.length,adj=Array.from({length:n},()=>[]),ind=Array(n).fill(0),done=Array(n).fill(0),ord=[],q=[];
  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){const r=bef(m.bx[i],m.bx[j]);if(r==1){adj[i].push(j);ind[j]++}else if(r==-1){adj[j].push(i);ind[i]++}}
@@ -192,17 +212,31 @@ function iso(m,ox0,oy0,bw,bh){const{A,B}=m,H=m.H;if(!(H>0))return'';
  while(q.length){const i=q.shift();ord.push(i);done[i]=1;adj[i].forEach(j=>{if(!--ind[j])q.push(j)})}
  for(let i=0;i<n;i++)if(!done[i])ord.push(i);
  const lg=[.35,.55,sP<0?-.75:.75],ll=Math.hypot(...lg);let o='';
- ord.forEach(bi=>{const r=m.bx[bi],Y=r.al=='Y',len=Y?r.y1-r.y0:r.x1-r.x0,t=r.z1-r.z0;
-  let pf=[[0,0]];coaks(r).sort((a,b)=>a.a-b.a).forEach(c=>pf.push(...arch(c.a,c.w,c.h)));pf.push([len,0],[len,t],[0,t]);
-  const W=(u,z,w)=>Y?[w,r.y0+u,r.z0+z]:[r.x0+u,w,r.z0+z],w0=Y?r.x0:r.y0,w1=Y?r.x1:r.y1,F=[];
-  const add=(pts,nw,cap)=>{if(nw[0]*d[0]+nw[1]*d[1]+nw[2]*d[2]>1e-6){const c=pts.reduce((a,p)=>[a[0]+p[0],a[1]+p[1],a[2]+p[2]],[0,0,0]).map(v=>v/pts.length);F.push({pts,nw,cap,k:c[0]*d[0]+c[1]*d[1]+c[2]*d[2]})}};
-  add(pf.map(p=>W(p[0],p[1],w1)),Y?[1,0,0]:[0,1,0],1);add(pf.map(p=>W(p[0],p[1],w0)),Y?[-1,0,0]:[0,-1,0],1);
-  pf.forEach((p,i)=>{const e=pf[(i+1)%pf.length],du=e[0]-p[0],dz=e[1]-p[1],nu=dz,nz=-du;
-   add([W(p[0],p[1],w0),W(p[0],p[1],w1),W(e[0],e[1],w1),W(e[0],e[1],w0)],Y?[0,nu,nz]:[nu,0,nz])});
-  F.sort((a,b)=>(a.cap?1:0)-(b.cap?1:0)||a.k-b.k).forEach(fc=>{const nl=Math.hypot(...fc.nw)||1,dt=Math.max(0,(fc.nw[0]*lg[0]+fc.nw[1]*lg[1]+fc.nw[2]*lg[2])/nl/ll);
-   o+=`<polygon points="${fc.pts.map(p=>P(...p)).join(' ')}" fill="${sh(r.c,.6+.4*dt)}" stroke="#222" stroke-width=".5" stroke-linejoin="round"/>`});
+ if(sP>0){const e=.05*Math.max(A,B);o+=`<polygon points="${[[-e,-e,0],[A+e,-e,0],[A+e,B+e,0],[-e,B+e,0]].map(p=>P(...p)).join(' ')}" fill="#000" fill-opacity=".18" filter="url(#bl)"/>`}
+ ord.forEach(bi=>{const r=m.bx[bi],Y=r.al=='Y',len=Y?r.y1-r.y0:r.x1-r.x0,gr=r.k=='balok'?GR():null,cos=coaks(r).sort((a,b)=>a.a-b.a);
+  const mkF=()=>{const F=[];F.add=(pts,nw,cap)=>{if(nw[0]*d[0]+nw[1]*d[1]+nw[2]*d[2]>1e-6){const c=pts.reduce((a,p)=>[a[0]+p[0],a[1]+p[1],a[2]+p[2]],[0,0,0]).map(v=>v/pts.length);F.push({pts,nw,cap,k:c[0]*d[0]+c[1]*d[1]+c[2]*d[2]})}};return F};
+  const flush=F=>F.sort((a,b)=>(a.cap?1:0)-(b.cap?1:0)||a.k-b.k).forEach(fc=>{const nl=Math.hypot(...fc.nw)||1,dt=Math.max(0,(fc.nw[0]*lg[0]+fc.nw[1]*lg[1]+fc.nw[2]*lg[2])/nl/ll);
+   o+=`<polygon points="${fc.pts.map(p=>P(...p)).join(' ')}" fill="${sh(r.c,.52+.48*dt)}" stroke="${sh(r.c,.38)}" stroke-width=".5" stroke-linejoin="round"/>`});
+  const prism=(wa,wb,zl,zh)=>{let pf=[[0,zl]];cos.forEach(c=>arch(c.a,c.w,c.h).forEach(p=>pf.push([p[0],Math.min(Math.max(p[1],zl),zh)])));pf.push([len,zl],[len,zh],[0,zh]);
+   const W=(u,z,w)=>Y?[w,r.y0+u,r.z0+z]:[r.x0+u,w,r.z0+z],F=mkF();
+   F.add(pf.map(p=>W(p[0],p[1],wb)),Y?[1,0,0]:[0,1,0],1);F.add(pf.map(p=>W(p[0],p[1],wa)),Y?[-1,0,0]:[0,-1,0],1);
+   pf.forEach((p,i)=>{const e=pf[(i+1)%pf.length],du=e[0]-p[0],dz=e[1]-p[1],nu=dz,nz=-du;
+    F.add([W(p[0],p[1],wa),W(p[0],p[1],wb),W(e[0],e[1],wb),W(e[0],e[1],wa)],Y?[0,nu,nz]:[nu,0,nz])});
+   flush(F)};
+  const xprism=cs=>{const W=(u,w,z)=>Y?[w,r.y0+u,r.z0+z]:[r.x0+u,w,r.z0+z],F=mkF();
+   F.add(cs.map(p=>W(len,p[0],p[1])),Y?[0,1,0]:[1,0,0],1);F.add(cs.map(p=>W(0,p[0],p[1])),Y?[0,-1,0]:[-1,0,0],1);
+   cs.forEach((p,i)=>{const e=cs[(i+1)%cs.length],dw=e[0]-p[0],dz=e[1]-p[1],nw=dz,nz=-dw;
+    F.add([W(0,p[0],p[1]),W(len,p[0],p[1]),W(len,e[0],e[1]),W(0,e[0],e[1])],Y?[nw,0,nz]:[0,nw,nz])});
+   flush(F)};
+  const wa0=Y?r.x0:r.y0,wb0=Y?r.x1:r.y1,t=r.z1-r.z0;
+  if(gr){const wd=wb0-wa0,g=Math.min(gr.w,wd*.9),dp=Math.min(gr.d,t*.9),l=(wd-g)/2;
+   if(!cos.length)xprism([[wa0,0],[wa0+l,0],[wa0+l,dp],[wa0+l+g,dp],[wa0+l+g,0],[wb0,0],[wb0,t],[wa0,t]]);
+   else{const bridge=()=>prism(wa0,wb0,dp,t),legs=()=>{prism(wa0,wa0+l,0,dp);prism(wb0-l,wb0,0,dp)};if(sP<0){bridge();legs()}else{legs();bridge()}}}
+  else prism(wa0,wb0,0,t);
+  if(r.k!='balok'){const zf=sP>0?r.z1:r.z0;[.22,.5,.78].forEach(fr=>{const w=wa0+(wb0-wa0)*fr,a=Y?[w,r.y0+len*.04,zf]:[r.x0+len*.04,w,zf],b=Y?[w,r.y0+len*.96,zf]:[r.x0+len*.96,w,zf];o+=`<path d="M${P(...a)}L${P(...b)}" stroke="#000" stroke-opacity=".13" stroke-width=".5"/>`})}
   const nz=r.k=='atas'&&sP>0?r.z1:r.k=='bawah'&&sP<0?r.z0:null;if(nz!==null)nailPts(m,r).forEach(p=>{const q=P(p[0],p[1],nz).split(',');o+=`<circle cx="${q[0]}" cy="${q[1]}" r="1.5" fill="#222"/>`})
  });
+ if(dims){
  const sc=[ox+pr(A/2,B/2,H/2)[0]*s,oy+pr(A/2,B/2,H/2)[1]*s];
  const dl=(sg,mk,L)=>{let r='';const pt=t=>{const[a,b]=pr(...mk(t));return[ox+a*s,oy+b*s]},pa=pt(0),pb=pt(L),dx=pb[0]-pa[0],dy=pb[1]-pa[1],dn=Math.hypot(dx,dy)||1;
   let nx=-dy/dn,ny=dx/dn;const md=[(pa[0]+pb[0])/2,(pa[1]+pb[1])/2];if((md[0]+nx-sc[0])**2+(md[1]+ny-sc[1])**2<(md[0]-sc[0])**2+(md[1]-sc[1])**2){nx=-nx;ny=-ny}
@@ -212,62 +246,96 @@ function iso(m,ox0,oy0,bw,bh){const{A,B}=m,H=m.H;if(!(H>0))return'';
   sg.forEach(g=>{const p=pt(g.a),q=pt(g.b),t=f(g.b-g.a),l=Math.hypot(q[0]-p[0],q[1]-p[1]);if(l<t.length*4.8+2)return;
    const mx=(p[0]+q[0])/2+nx*9,my=(p[1]+q[1])/2+ny*9;
    r+=`<text transform="rotate(${ang.toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)})" x="${mx.toFixed(1)}" y="${(my+3).toFixed(1)}" font-size="9" text-anchor="middle" fill="${g.gap?'#c0392b':'#111'}">${t}</text>`});return r};
- const sx3=pick(m,['balok','bawah','atas','apit'],'x'),sy3=pick(m,['atas','balok','apit','bawah'],'y');
+ const sx3=pick(m,['atas','apit','balok','bawah'],'x'),sy3=pick(m,['atas','apit','balok','bawah'],'y');
  o+=dl(sx3,t=>[t,cyp+gy*off,0],A)+dl([{a:0,b:A,gap:0}],t=>[t,cyp+gy*o2,0],A)+dl(sy3,t=>[cxp+gx*off,t,0],B)+dl([{a:0,b:B,gap:0}],t=>[cxp+gx*o2,t,0],B);
  const cn=[[0,0],[A,0],[0,B],[A,B]].sort((a,b)=>pr(b[0],b[1],0)[0]-pr(a[0],a[1],0)[0])[0],h0=pr(cn[0],cn[1],0),h1=pr(cn[0],cn[1],H),hx=ox+h0[0]*s+16,y0=oy+h0[1]*s,y1=oy+h1[1]*s;
  o+=`<path d="M${hx} ${y0}V${y1}M${hx-3} ${y0}H${hx+3}M${hx-3} ${y1}H${hx+3}" stroke="#444" stroke-width=".8"/><text transform="rotate(90 ${hx+34} ${(y0+y1)/2})" x="${hx+34}" y="${(y0+y1)/2}" font-size="10" font-weight="700" text-anchor="middle">${f(H)} cm</text>`;
- ORD.filter(k=>m.zz[k][1]>m.zz[k][0]).forEach(k=>{const[a,b]=m.zz[k],ya=oy+(h0[1]-a*cP)*s,yb=oy+(h0[1]-b*cP)*s;o+=`<path d="M${hx-3} ${yb}H${hx+3}" stroke="#444" stroke-width=".8"/>`;if(Math.abs(ya-yb)>=4)o+=`<text x="${hx+7}" y="${(ya+yb)/2+3}" font-size="9" fill="#111">${f(b-a)}</text>`});
+ ORD.filter(k=>m.zz[k][1]>m.zz[k][0]).forEach((k,ki)=>{const[a,b]=m.zz[k],ya=oy+(h0[1]-a*cP)*s,yb=oy+(h0[1]-b*cP)*s;o+=`<path d="M${hx-3} ${yb}H${hx+3}" stroke="#444" stroke-width=".8"/>`;if(Math.abs(ya-yb)>=4)o+=`<text x="${hx+7+(Math.abs(ya-yb)<9&&ki%2?14:0)}" y="${(ya+yb)/2+3}" font-size="${Math.abs(ya-yb)<9?7:9}" fill="#111">${f(b-a)}</text>`});
+ }
+ if(op.call){const cl=[],key=r=>((r.x0+r.x1)/2)*d[0]+((r.y0+r.y1)/2)*d[1];
+  ['atas','apit','balok','bawah'].forEach(k=>{const L=S.L[k];if(!L.on)return;L.items.forEach((it,i)=>{const bs=m.bx.filter(r=>r.k==k&&r.i==i);if(!bs.length)return;
+   const sb=[...bs].sort((a,b)=>key(a)-key(b)),r=k=='atas'?sb[Math.floor(sb.length/2)]:sb[sb.length-1],fxa=Math.abs(d[0])>=Math.abs(d[1]),useX=k=='balok'?fxa:(Math.abs(d[fxa?1:0])>.2?!fxa:fxa);let p;
+   if(k=='atas'&&sP>0)p=[(r.x0+r.x1)/2,(r.y0+r.y1)/2,r.z1];
+   else if(k=='bawah'&&sP<0)p=[(r.x0+r.x1)/2,(r.y0+r.y1)/2,r.z0];
+   else if(useX)p=[d[0]>0?r.x1:r.x0,(r.y0+r.y1)/2,(r.z0+r.z1)/2];
+   else p=[(r.x0+r.x1)/2,d[1]>0?r.y1:r.y0,(r.z0+r.z1)/2];
+   const q=P(...p).split(',').map(Number);
+   cl.push({x:q[0],y:q[1],t:`${NM[k]}${L.items.length>1?' '+(i+1):''}: ${String(it.spec).replace(/\s/g,'').replace(/[x×*]/gi,' x ')}`})})});
+  const cx=ox0+bw/2;[cl.filter(c=>c.x<cx),cl.filter(c=>c.x>=cx)].forEach((g,si)=>{g.sort((a,b)=>a.y-b.y).forEach((c,j)=>{const ly=by0+12+j*14,tw=c.t.length*5.3,lx=si?ox0+bw-4:ox0+4,ex=si?lx-tw-3:lx+tw+3;
+    o+=`<text x="${lx}" y="${ly}" font-size="9.5" fill="#111" text-anchor="${si?'end':'start'}">${esc(c.t)}</text><path d="M${ex} ${ly-3}L${c.x} ${c.y}" stroke="#666" stroke-width=".6"/><circle cx="${c.x}" cy="${c.y}" r="1.8" fill="#c0392b"/>`})})}
  return o}
 function layerSegs(m,k){const L=S.L[k],ax=(k=='balok'&&L.bm=='grid')?['x','y']:[L.along=='Y'?'x':'y'];
  return ax.map(a=>{const T=a=='x'?S.A:S.B,g=build(ivs(m,k,a),T).filter(x=>x.gap&&x.a>.05&&x.b<T-.05).map(x=>f(x.b-x.a));
   return g.length?(ax.length>1?a.toUpperCase()+': ':'')+g.join(' | '):''}).filter(Boolean).join('; ')}
-function sheet(){const m=model(),NL=[],Ls=[`Ukuran palet: ${f(m.A)} x ${f(m.B)} x ${f(m.H)} cm`];
+function sheet(){const m=model(),NL=[],LB={atas:'Papan atas',apit:'Papan apit',balok:'Balok',bawah:'Papan bawah'},rows=[{lab:'Ukuran palet',val:`${f(m.A)} x ${f(m.B)} x ${f(m.H)} cm`,b:1},{gap:1}];
  ['atas','apit','balok','bawah'].forEach(k=>{const L=S.L[k];if(!L.on||m.dd[k].some(d=>!d))return;
-  const grid=k=='balok'&&L.bm=='grid',byC=L.gdir!='baris',as=grid?assign(L.items,byC?L.nx:L.ny,false):assign(L.items,0,true);
-  L.items.forEach((it,i)=>{const cnt=as.filter(v=>v==i).length*(grid?(byC?L.ny:L.nx):1);
-   Ls.push(`${NM[k]}${L.items.length>1?' '+(i+1):''}: ${String(it.spec).replace(/\s/g,'').replace(/[x×*]/gi,' x ')} = ${cnt} pcs`+(String(it.slots).trim()?` (${grid?(byC?'kolom':'baris'):'papan'} ke ${it.slots})`:''))});
-  const g='';if(g)Ls.push(`   Rongga ${NM[k].toLowerCase()}: ${g} cm`);if(k!='balok'){const e=+L.nailE==3,o=+L.nail==3;if(e||o)NL.push(`Paku ${NM[k].toLowerCase()}: ${e&&o?'semua papan':e?'papan pinggir':'papan selain pinggir'} 3 titik`)}});
- Ls.push(S.nailTxt,...NL);
- let s=`<svg xmlns="${NS}" viewBox="0 0 800 1130" width="800" height="1130" font-family="Arial,sans-serif"><defs><pattern id="hz" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="#fff"/><line x1="0" y1="0" x2="0" y2="5" stroke="#333" stroke-width="1"/></pattern></defs><rect width="800" height="1130" fill="#fff"/>`;
- const kn=String(K.name||''),kfs=Math.max(12,Math.min(26,Math.floor(420/(Math.max(kn.length,1)*.62))));
- if(K.logoL)s+=`<image href="${K.logoL}" x="40" y="18" width="140" height="54" preserveAspectRatio="xMinYMid meet"/>`;
- if(K.logoR)s+=`<image href="${K.logoR}" x="620" y="18" width="140" height="54" preserveAspectRatio="xMaxYMid meet"/>`;
- s+=`<text x="400" y="55" font-size="${kfs}" font-weight="700" fill="#1f3a8a" text-anchor="middle">${esc(kn)}</text><path d="M40 78H760" stroke="#8b3a4a" stroke-width="3"/><text x="400" y="118" font-size="28" font-weight="700" text-anchor="middle">${esc(K.title)}</text><text x="40" y="150" font-size="19" font-weight="700">${esc(S.cust)}</text>`;
- const fs=Ls.length>16?11:13,lh=fs+4;Ls.forEach((t,i)=>s+=`<text x="40" y="${172+i*lh}" font-size="${fs}"${i==0?' font-weight="700"':''}>${esc(t)}</text>`);
- const Y0=Math.max(330,172+Ls.length*lh+16),lab=(t,x,y)=>`<text x="${x}" y="${y}" font-size="16" font-weight="700">${t}</text>`,R=1050-Y0;
- if(S.mode=='2d'){const h1=Math.min(170,R*.28),y2=Y0+h1+36;
-  s+=lab('TAMPAK DEPAN',40,Y0)+lab('TAMPAK SAMPING',420,Y0)+view('front',m,40,Y0+10,360,h1)+view('side',m,420,Y0+10,360,h1)+lab('TAMPAK ATAS',40,y2)+lab('TAMPAK BAWAH',420,y2)+view('top',m,40,y2+10,360,1050-y2-10)+view('bottom',m,420,y2+10,360,1050-y2-10)}
- else if(S.mode=='3d')s+=lab('TAMPAK 3D',40,Y0)+iso(m,40,Y0+10,720,R-20);
- else s+=lab('TAMPAK ATAS',40,Y0)+view('top',m,40,Y0+10,720,R-10);
+  const grid=k=='balok'&&L.bm=='grid';
+  L.items.forEach((it,i)=>{const cnt=m.bx.filter(r=>r.k==k&&r.i==i).length;
+   rows.push({lab:`${LB[k]}${L.items.length>1?' '+(i+1):''}`,val:`${String(it.spec).replace(/\s/g,'').replace(/[x×*]/gi,' x ')} = ${cnt} pcs`+(String(it.slots).trim()?` (${grid?'penempatan':'papan ke'} ${it.slots})`:'')})});
+  if(k!='balok'){const e=+L.nailE==3,o=+L.nail==3;if(e||o)NL.push(`Paku ${LB[k].toLowerCase()}: ${e&&o?'semua papan':e?'papan pinggir':'papan selain pinggir'} 3 titik`)}});
+ rows.push({gap:1},{txt:S.nailTxt,b:1});NL.forEach(t=>rows.push({txt:t}));
+ let s=`<svg xmlns="${NS}" viewBox="0 0 800 1130" width="800" height="1130" font-family="Arial,sans-serif"><defs><pattern id="hz" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="#fff"/><line x1="0" y1="0" x2="0" y2="5" stroke="#333" stroke-width="1"/></pattern><filter id="bl" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="4"/></filter></defs><rect width="800" height="1130" fill="#fff"/>`;
+ const hL=K.logoL?Math.max(30,+K.lhL||64):0,hR=K.logoR?Math.max(30,+K.lhR||64):0,hm=Math.max(54,hL,hR),dy=hm-54,wL=hL*1.7,wR=hR*1.7,kn=String(K.name||''),x0=40+(wL?wL+14:0),x1=760-(wR?wR+14:0),cxh=(x0+x1)/2,kfs=+K.nameSize>0?+K.nameSize:Math.max(12,Math.min(26,Math.floor((x1-x0)/(Math.max(kn.length,1)*.62)))),sfs=+K.subSize>0?+K.subSize:15,hasT=!!String(K.tag||'').trim();
+ if(K.logoL)s+=`<image href="${K.logoL}" x="40" y="${14+(hm-hL)/2}" width="${wL}" height="${hL}" preserveAspectRatio="xMinYMid meet"/>`;
+ if(K.logoR)s+=`<image href="${K.logoR}" x="${760-wR}" y="${14+(hm-hR)/2}" width="${wR}" height="${hR}" preserveAspectRatio="xMaxYMid meet"/>`;
+ s+=`<text x="${cxh}" y="${(14+hm*.4+kfs*.35).toFixed(1)}" font-size="${kfs}" font-weight="700" fill="#1a237e" text-anchor="middle">${esc(kn)}</text>`;
+ if(String(K.sub||'').trim())s+=`<text x="${cxh}" y="${(14+hm*.74+sfs*.3).toFixed(1)}" font-size="${sfs}" font-weight="700" fill="#e0511c" text-anchor="middle">${esc(K.sub)}</text>`;
+ s+=hasT?`<rect x="40" y="${20+hm}" width="720" height="16" fill="#4b5870"/><text x="400" y="${20+hm+11.5}" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="3">${esc(K.tag)}</text>`:`<path d="M40 ${24+hm}H760" stroke="#8b3a4a" stroke-width="3"/>`;
+ s+=`<text x="400" y="${hm+64}" font-size="${+K.titleSize>0?+K.titleSize:24}" font-weight="700" text-anchor="middle" text-decoration="underline">${esc(K.title)}</text><text x="40" y="${hm+96}" font-size="19" font-weight="700">${esc(S.cust)}</text>`;
+ const fs=rows.length>14?12:13,lh=fs+5;let yy=172+dy;
+ rows.forEach(r=>{if(r.gap){yy+=lh*.55;return}const w=r.b?' font-weight="700"':'';
+  s+=r.lab!==undefined?`<text x="40" y="${yy}" font-size="${fs}"${w}>${esc(r.lab)}</text><text x="146" y="${yy}" font-size="${fs}"${w}>:</text><text x="158" y="${yy}" font-size="${fs}"${w}>${esc(r.val)}</text>`:`<text x="40" y="${yy}" font-size="${fs}"${w}>${esc(r.txt)}</text>`;yy+=lh});
+ let ny=0;
+ if(+S.notesOn){const its=String(S.notes||'').split('\n').map(x=>x.trim()).filter(Boolean);
+  if(its.length){const NX=470;s+=`<text x="${NX}" y="${172+dy}" font-size="12" font-weight="700">Catatan :</text>`;ny=172+dy+17;
+   its.forEach((t,i)=>{const ls=[];let cur='';t.split(' ').forEach(w=>{if((cur+' '+w).trim().length>46){ls.push(cur);cur=w}else cur=(cur+' '+w).trim()});if(cur)ls.push(cur);
+    ls.forEach((l,j)=>{s+=`<text x="${j?NX+13:NX}" y="${ny}" font-size="10.5">${j?'':(i+1)+'. '}${esc(l)}</text>`;ny+=13.5})})}}
+ const VE=(S.ttd&&+S.ttd.on)?925:1050,Y0=Math.max(330+dy,yy+10,ny+8),lab=(t,x,y)=>`<text x="${x}" y="${y}" font-size="16" font-weight="700">${t}</text>`,R=VE-Y0;
+ let Yb=VE;
+ if(S.mode=='2d'){const sw=Math.max(280/m.A,280/m.B),hasC=m.bx.some(r=>coaks(r).length),h1=Math.min(170,m.H*sw+46+(hasC?26:0)+4),y2=Y0+h1+34,bh2=VE-y2-10,sT=Math.min(280/m.A,(bh2-46)/m.B);Yb=y2+10+m.B*sT+46;
+  s+=lab('TAMPAK DEPAN',40,Y0)+lab('TAMPAK SAMPING',420,Y0)+view('front',m,40,Y0+10,360,h1)+view('side',m,420,Y0+10,360,h1)+lab('TAMPAK ATAS',40,y2)+lab('TAMPAK BAWAH',420,y2)+view('top',m,40,y2+10,360,bh2)+view('bottom',m,420,y2+10,360,bh2)}
+ else if(S.mode=='3d'){const hM=R*.5,hS=R*.2,y2=Y0+hM+22,y3=y2+hS+26;
+  s+=lab('TAMPAK 3D',40,Y0)+iso(m,40,Y0+8,720,hM,{call:1})+lab('TAMPAK DEPAN',40,y2)+lab('TAMPAK SAMPING',420,y2)+iso(m,40,y2+6,350,hS,{az:0,el:16,dims:false})+iso(m,420,y2+6,350,hS,{az:90,el:34,dims:false})+lab('TAMPAK BAWAH',40,y3)+iso(m,40,y3+6,720,hS,{az:135,el:-35,dims:false})}
+ else if(S.mode=='3d1')s+=lab('TAMPAK 3D',40,Y0)+iso(m,40,Y0+10,720,R-20,{call:1});
+ else{Yb=Y0+10+m.B*Math.min(640/m.A,(R-10-46)/m.B)+46;s+=lab('TAMPAK ATAS',40,Y0)+view('top',m,40,Y0+10,720,R-10)}
+ if(S.ttd&&+S.ttd.on){const T=S.ttd,MN=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];let dt=T.tgl?new Date(T.tgl+'T00:00:00'):new Date();if(isNaN(dt))dt=new Date();
+  const ds=`${String(dt.getDate()).padStart(2,'0')}-${MN[dt.getMonth()]}-${dt.getFullYear()}`;
+  const T0=Math.min(Math.max((Yb+1056)/2-45,Yb+22),948);s+=`<text x="60" y="${T0}" font-size="12.5">${esc(T.lok||'')}${T.lok?', ':''}${ds}</text>`;
+  T.p.forEach((q,i)=>{const cx=[165,400,635][i];if(!(q.h||q.n||q.j))return;
+   s+=`<text x="${cx}" y="${T0+24}" font-size="12.5" text-anchor="middle">${esc(q.h)}</text>`+(q.n?`<text x="${cx}" y="${T0+86}" font-size="12.5" text-anchor="middle" text-decoration="underline">${esc(q.n)}</text>`:'')+`<text x="${cx}" y="${T0+101}" font-size="12.5" text-anchor="middle">${esc(q.j)}</text>`})}
  const ad=String(K.addr||'').split('\n').map(x=>x.trim()).filter(Boolean).slice(0,4);
- s+=`<path d="M40 1062H760" stroke="#555" stroke-width="3"/>`+ad.map((t,i)=>`<text x="400" y="${1080+i*14}" font-size="11" font-weight="700" text-anchor="middle">${esc(t)}</text>`).join('')+`</svg>`;
- return{s,wr:m.wr,m}}
-function draw(){try{localStorage.setItem('palet-S2',JSON.stringify(S))}catch(e){}try{const r=sheet();document.getElementById('paper').innerHTML=r.s;document.getElementById('warn').innerHTML=r.wr.map(w=>'⚠ '+esc(w)).join('<br>');
+ s+=`<polygon points="40,1056 560,1060 40,1066" fill="#e8a21d"/><polygon points="230,1062 760,1056 760,1066" fill="#1c4bd1"/>`+ad.map((t,i)=>`<text x="400" y="${1082+i*13.5}" font-size="11" font-weight="700" text-anchor="middle" fill="#2a4bd0">${esc(t)}</text>`).join('')+`</svg>`;
+ return{s,wr:m.wr,m,Y0,Yb}}
+function draw(){try{localStorage.setItem('palet-S2',JSON.stringify(S))}catch(e){}try{const r=sheet();let sv=r.s;if(!FULLV){const y0=Math.max(0,r.Y0-24),y1=Math.min(1060,r.Yb+10);sv=sv.replace('viewBox="0 0 800 1130" width="800" height="1130"',`viewBox="30 ${y0} 740 ${y1-y0}"`)}document.getElementById('paper').innerHTML=sv;document.getElementById('warn').innerHTML=r.wr.map(w=>'⚠ '+esc(w)).join('<br>');
  ORD.forEach(k=>S.L[k].items.forEach((it,i)=>{const e=document.getElementById(`chip-${k}-${i}`),d=dims(it,S.L[k],k);if(e)e.textContent=d?`tebal/tinggi ${d.t} · lebar ${d.w} · panjang ${d.l} cm`:''}))}catch(e){console.error(e)}}
 const I=(l,a,v,x)=>`<label>${l}<input ${x||'type=number step=any'} value="${esc(v)}" ${a}></label>`;
 const SEL=(l,a,v,o)=>`<label>${l}<select ${a}>${o.map(([k,t])=>`<option value="${k}" ${v==k?'selected':''}>${t}</option>`).join('')}</select></label>`;
-const TABS=[['umum','Umum'],['atas','Papan atas'],['apit','Papan apit'],['balok','Balok'],['bawah','Papan bawah'],['kop','Kop surat'],['riwayat','Riwayat']];
+const TABS=[['umum','Umum'],['atas','Papan atas'],['apit','Papan apit'],['balok','Balok'],['bawah','Papan bawah'],['ttd','Catatan & TTD'],['kop','Kop surat'],['riwayat','Riwayat']];
 function ui(){
  document.getElementById('tabs').innerHTML=TABS.map(([k,t])=>`<button class="tab${TAB==k?' on':''}" onclick="setTab('${k}')">${t}</button>`).join('');
- document.getElementById('viewbar').innerHTML=`<div class="seg">${[['2d','2D 4 tampak'],['3d','3D'],['atas','2D atas']].map(([k,t])=>`<button class="tab${S.mode==k?' on':''}" onclick="setMode('${k}')">${t}</button>`).join('')}</div>`+(S.mode=='3d'?`<div class="grid" style="margin:0 0 8px">${SEL('Sudut 3D (putar)','data-p="az"',S.az,[[45,'Sudut 1'],[135,'Sudut 2'],[225,'Sudut 3'],[315,'Sudut 4']])}${SEL('Ketinggian 3D','data-p="el"',S.el,[[50,'Dari atas'],[35,'Miring atas'],[12,'Rendah'],[-30,'Dari bawah']])}</div>`:'');
- document.getElementById('panel').innerHTML=TAB=='umum'?umum():TAB=='kop'?kopCard():TAB=='riwayat'?histCard():layerCard(TAB);
+ document.getElementById('viewbar').innerHTML=`<div class="seg">${[['2d','2D 4 tampak'],['3d','3D 4 tampak'],['3d1','3D besar'],['atas','2D atas']].map(([k,t])=>`<button class="tab${S.mode==k?' on':''}" onclick="setMode('${k}')">${t}</button>`).join('')}</div>`+(S.mode=='3d'||S.mode=='3d1'?`<div class="grid" style="margin:0 0 8px">${SEL('Sudut 3D (putar)','data-p="az"',S.az,[[45,'Sudut 1'],[135,'Sudut 2'],[225,'Sudut 3'],[315,'Sudut 4']])}${SEL('Ketinggian 3D','data-p="el"',S.el,[[50,'Dari atas'],[35,'Miring atas'],[12,'Rendah'],[-30,'Dari bawah']])}</div>`:'');
+ document.getElementById('panel').innerHTML=TAB=='umum'?umum():TAB=='kop'?kopCard():TAB=='ttd'?ttdCard():TAB=='riwayat'?histCard():layerCard(TAB);
  draw()}
 function setTab(k){TAB=k;ui()}
+function togglePv(){FULLV=!FULLV;document.querySelector('.tornwrap').classList.toggle('full',FULLV);draw()}
 function setMode(k){S.mode=k;ui()}
-function umum(){return `<div class="card"><h2>Palet</h2><div class="grid">${SEL('Contoh','onchange="preset(this.value)"','',[['','Pilih contoh…'],['p1','Papan atas 2 ukuran'],['p2','Papan atas 3 ukuran'],['dadu','Balok dadu (pinggir panjang)'],['dadu2','Balok dadu sama panjang'],['coak','Palet coak'],['reset','Reset']])}${I('Pelanggan','data-p="cust"',S.cust,'type=text')}${I('Lebar palet X (kosong = otomatis)','data-p="A"',S.A||'','type=number step=any placeholder="otomatis"')}${I('Panjang palet Y (kosong = otomatis)','data-p="B"',S.B||'','type=number step=any placeholder="otomatis"')}${I('Jenis paku','data-p="nailTxt"',S.nailTxt,'type=text')}</div><small>Ukuran palet dihitung otomatis dari panjang papan dan balok, jadi ukuran berapa pun bisa digambar dengan skala yang sama. Isi lebar/panjang hanya jika ingin menimpa.</small></div>`}
+function umum(){return `<div class="card"><h2>Palet</h2><div class="grid">${SEL('Contoh','onchange="preset(this.value)"','',[['','Pilih contoh…'],['p1','Papan atas 2 ukuran'],['p2','Papan atas 3 ukuran'],['dadu','Balok dadu (pinggir panjang)'],['dadu2','Balok dadu sama panjang'],['coak','Palet coak'],['rapat1','Papan atas pinggir rapat 2 pcs'],['rapat2','Papan atas berpasangan (10 pcs)'],['kuping','Palet kupingan'],['profil','Balok coak profil (alur tali)'],['reset','Reset']])}${I('Pelanggan','data-p="cust"',S.cust,'type=text')}${I('Lebar palet X (kosong = otomatis)','data-p="A"',S.A||'','type=number step=any placeholder="otomatis"')}${I('Panjang palet Y (kosong = otomatis)','data-p="B"',S.B||'','type=number step=any placeholder="otomatis"')}${I('Jenis paku','data-p="nailTxt"',S.nailTxt,'type=text')}</div><small>Ukuran palet dihitung otomatis dari panjang papan dan balok, jadi ukuran berapa pun bisa digambar dengan skala yang sama. Isi lebar/panjang hanya jika ingin menimpa.</small></div>`}
 function layerCard(k){const L=S.L[k],a=`data-l="${k}"`,A=x=>`${a} data-k="${x}"`,bal=k=='balok',grid=bal&&L.bm=='grid';
  return `<div class="card"><label class="ck"><input type="checkbox" ${A('on')} ${L.on?'checked':''}><b>${NM[k]}</b></label>
  ${L.items.map((it,i)=>{const b=`${a} data-i="${i}"`,B=x=>`${b} data-k="${x}"`;
-  return `<div class="grid it">${I((L.items.length>1?'Ukuran '+(i+1):'Ukuran')+(bal?' (L x T x P)':' (tebal x lebar x panjang)'),B('spec'),it.spec,'type=text placeholder="2x10x110"')}${I(grid?'Qty (otomatis)':'Qty (pcs)',B('n'),it.n,'type=number step=any'+(grid?' disabled':''))}${I(grid?'Nomor '+(L.gdir=='baris'?'baris':'kolom'):'Penempatan (nomor ke-)',B('slots'),it.slots,'type=text placeholder="mis. 3,7 (kosong=sisa)"')}<label>Warna<input type="color" ${B('color')} value="${it.color}" style="padding:1px;height:36px"></label>${L.items.length>1?`<button class="s" onclick="delItem('${k}',${i})">Hapus</button>`:''}</div><small id="chip-${k}-${i}"></small>`}).join('')}
+  return `<div class="grid it">${I((L.items.length>1?'Ukuran '+(i+1):'Ukuran')+(bal?' (L x T x P)':' (tebal x lebar x panjang)'),B('spec'),it.spec,'type=text placeholder="2x10x110"')}${I('Qty (pcs)',B('n'),it.n,'type=number step=any')}${I(grid?'Penempatan (pinggir / tengah / nomor blok)':'Penempatan (nomor ke-)',B('slots'),it.slots,grid?'type=text placeholder="mis. pinggir  atau  1,3,7"':'type=text placeholder="mis. 3,7 (kosong=sisa)"')}<label>Warna<input type="color" ${B('color')} value="${it.color}" style="padding:1px;height:36px"></label>${L.items.length>1?`<button class="s" onclick="delItem('${k}',${i})">Hapus</button>`:''}</div><small id="chip-${k}-${i}"></small>`}).join('')}
  <button class="s" onclick="addItem('${k}')">+ Tambah ukuran ${bal?'balok':'papan'}</button>
  <details><summary>Atur lanjutan</summary><div class="grid">
  ${grid?'':SEL('Arah panjang',A('along'),L.along,[['X','Searah X'],['Y','Searah Y']].concat(k=='bawah'?[['atas','Searah papan atas'],['apit','Searah papan apit']]:[]))}
  ${I(grid?'Jarak antar kolom X (cm)':'Jarak/rongga (cm)',A('gaps'),L.gaps,'type=text placeholder="kosong=rata, 11=tetap, 34.5,11,34.5"')}
- ${grid?'':I('Rapat per kelompok',A('grp'),L.grp)}
+ ${grid?'':SEL('Mode rapat',A('rm'),L.rm||'semua',[['semua','Semua berpasangan'],['pinggir','Pinggir saja'],['tengah','Tengah saja']])+I('Jumlah papan rapat (1 = tidak rapat)',A('grp'),L.grp)}
+ ${I('Kuping / inset dari ujung (cm)',A('kup'),L.kup||0)}
  ${bal?'':I('Paku papan pinggir (titik)',A('nailE'),L.nailE)+I('Paku papan lain (titik)',A('nail'),L.nail)}
- ${bal?SEL('Mode balok',A('bm'),L.bm,[['long','Memanjang'],['grid','Blok dadu (grid)']])+SEL('Urutan angka',A('ord'),L.ord,[['wtl','lebar x tinggi x panjang'],['twl','tinggi x lebar x panjang']])+(grid?I('Jumlah kolom X',A('nx'),L.nx)+I('Jumlah baris Y',A('ny'),L.ny)+SEL('Penomoran ukuran',A('gdir'),L.gdir,[['kolom','Per kolom (X)'],['baris','Per baris (Y)']])+I('Jarak antar baris Y (cm)',A('gy'),L.gy,'type=text'):I('Coak: posisi awal (cm)',A('coak'),L.coak,'type=text placeholder="20,82"')+I('Coak: lebar',A('cw'),L.cw)+I('Coak: tinggi',A('ch'),L.ch)):''}
- </div><small>Rapat per kelompok: 2 = papan berpasangan tanpa celah. Penempatan: nomor urut papan dari tepi X/Y awal.</small></details></div>`}
-function kopCard(){return `<div class="card"><h2>Kop surat</h2><div class="grid">${I('Nama perusahaan (kop atas)','data-kop="name"',K.name,'type=text')}${I('Judul gambar','data-kop="title"',K.title,'type=text')}<label class="wide">Alamat / footer (satu alamat per baris, maksimal 4 baris)<textarea rows="5" data-kop="addr">${esc(K.addr)}</textarea></label><label>Logo kiri atas<input type="file" accept="image/*" onchange="logo('L',this)"></label><label>Logo kanan atas<input type="file" accept="image/*" onchange="logo('R',this)"></label></div>${K.logoL?`<button class="s" onclick="K.logoL='';saveK();ui()">Hapus logo kiri</button>`:''}${K.logoR?`<button class="s" onclick="K.logoR='';saveK();ui()">Hapus logo kanan</button>`:''}<small>Kop dan logo disimpan di perangkat ini dan dipakai di semua gambar.</small></div>`}
+ ${bal?SEL('Mode balok',A('bm'),L.bm,[['long','Memanjang'],['grid','Blok dadu (grid)']])+SEL('Urutan angka',A('ord'),L.ord,[['wtl','lebar x tinggi x panjang'],['twl','tinggi x lebar x panjang']])+(grid?SEL('Ikuti papan apit',A('gfollow'),+(L.gfollow??1),[[1,'Ya (posisi & jumlah ikut apit)'],[0,'Tidak (atur manual)']])+SEL('Arah panjang balok',A('galong'),L.galong||'apit',[['apit','Searah papan apit'],['X','Searah X'],['Y','Searah Y']])+I('Jumlah kolom X (jika manual)',A('nx'),L.nx)+I('Jumlah baris Y (jika manual)',A('ny'),L.ny)+SEL('Penomoran / arah pinggir',A('gdir'),L.gdir,[['kolom','Per kolom (X)'],['baris','Per baris (Y)']])+I('Jarak antar baris Y (cm)',A('gy'),L.gy,'type=text'):I('Coak: posisi awal (cm)',A('coak'),L.coak,'type=text placeholder="20,82"')+I('Coak: lebar',A('cw'),L.cw)+I('Coak: tinggi',A('ch'),L.ch)+SEL('Coak profil (alur tali)',A('gv'),+L.gv||0,[[0,'Tidak'],[1,'Ada']])+I('Alur tali: lebar (cm)',A('gw'),L.gw??2)+I('Alur tali: dalam (cm)',A('gd'),L.gd??1.5)):''}
+ </div><small>Blok dadu: qty bisa diubah bebas; kosongkan Penempatan untuk mengisi berurutan, atau isi pinggir / tengah / nomor blok (urut per kolom atau baris); blok yang tidak terisi dikosongkan. Rapat: papan menempel tanpa celah (mis. 2 = berpasangan; pinggir = di kedua ujung; tengah = di tengah). Kuping: balok/papan dipasang masuk sekian cm dari ujung. Penempatan: nomor urut papan dari tepi X/Y awal.</small></details></div>`}
+function ttdCard(){const T=S.ttd;return `<div class="card"><label class="ck"><input type="checkbox" data-p="notesOn" ${+S.notesOn?'checked':''}><b>Catatan</b></label><div class="grid"><label class="wide">Satu baris = satu poin (nomor otomatis). Tampil di kanan keterangan palet.<textarea rows="8" data-p="notes">${esc(S.notes)}</textarea></label></div></div>
+<div class="card"><label class="ck"><input type="checkbox" data-t="on" ${+T.on?'checked':''}><b>Tanda tangan</b></label><div class="grid">${I('Lokasi','data-t="lok"',T.lok,'type=text')}${I('Tanggal (kosong = hari ini)','data-t="tgl"',T.tgl,'type=date')}</div>${T.p.map((q,i)=>`<div class="grid it">${I('Judul '+(i+1),`data-tp="${i}" data-k="h"`,q.h,'type=text')}${I('Nama',`data-tp="${i}" data-k="n"`,q.n,'type=text')}${I('Jabatan',`data-tp="${i}" data-k="j"`,q.j,'type=text')}</div>`).join('')}<small>Kosongkan judul, nama, dan jabatan untuk menyembunyikan satu kolom. Hilangkan centang untuk menyembunyikan seluruh blok tanda tangan.</small></div>`}
+function kopCard(){return `<div class="card"><h2>Kop surat</h2><div class="grid">${I('Nama perusahaan (kop atas)','data-kop="name"',K.name,'type=text')}${I('Teks kedua (oranye, kosongkan = sembunyi)','data-kop="sub"',K.sub,'type=text')}${I('Teks pita (kosongkan = pita hilang)','data-kop="tag"',K.tag,'type=text')}${I('Ukuran teks kedua (0 = otomatis)','data-kop="subSize"',K.subSize)}${I('Judul gambar','data-kop="title"',K.title,'type=text')}${I('Ukuran judul gambar','data-kop="titleSize"',K.titleSize)}${I('Ukuran nama perusahaan (0 = otomatis)','data-kop="nameSize"',K.nameSize)}${I('Tinggi logo kiri (px)','data-kop="lhL"',K.lhL)}${I('Tinggi logo kanan (px)','data-kop="lhR"',K.lhR)}<label class="wide">Alamat / footer (satu alamat per baris, maksimal 4 baris)<textarea rows="5" data-kop="addr">${esc(K.addr)}</textarea></label><label>Logo kiri atas<input type="file" accept="image/*" onchange="logo('L',this)"></label><label>Logo kanan atas<input type="file" accept="image/*" onchange="logo('R',this)"></label></div>${K.logoL?`<button class="s" onclick="K.logoL='';saveK();ui()">Hapus logo kiri</button>`:''}${K.logoR?`<button class="s" onclick="K.logoR='';saveK();ui()">Hapus logo kanan</button>`:''}<small>Kop dan logo disimpan di perangkat ini dan dipakai di semua gambar.</small></div>`}
 function logo(side,inp){const fl=inp.files[0];if(!fl)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,400/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*k));c.height=Math.max(1,Math.round(im.height*k));c.getContext('2d').drawImage(im,0,0,c.width,c.height);K['logo'+side]=c.toDataURL('image/png');saveK();ui()};im.src=r.result};r.readAsDataURL(fl)}
 function histCard(){const a=hist();return `<div class="card"><h2>Riwayat gambar</h2>${curId?'<small>Sedang membuka gambar dari riwayat: tombol Simpan akan memperbarui entri ini.</small>':''}<div class="row" style="margin-top:8px"><button onclick="saveDraw(true)">Simpan sebagai baru</button></div>`+(a.length?a.map(x=>`<div class="hi"><div><b>${esc(x.name)}</b><small>${new Date(x.t).toLocaleString('id-ID')}</small></div><div class="hb"><button class="s" onclick="openDraw('${x.id}')">Buka</button><button class="s" onclick="delDraw('${x.id}')">Hapus</button></div></div>`).join(''):'<small style="margin-top:10px">Belum ada gambar tersimpan. Tekan Simpan di bawah gambar.</small>')+'</div>'}
 function saveDraw(asNew){const a=hist(),m=model(),snap=JSON.parse(JSON.stringify(S)),name=`${S.cust} · ${f(m.A)} x ${f(m.B)} x ${f(m.H)} cm`,i=a.findIndex(x=>x.id==curId);
@@ -280,11 +348,15 @@ function delItem(k,i){S.L[k].items.splice(i,1);ui()}
 function preset(v){if(!v)return;S=fresh();curId=null;const L=S.L,c=S.cust;
  if(v=='p1'){S.A=0;S.B=0;L.atas.items=[IT('2x10x120',7),IT('2x8x120',2,{slots:'3,7',color:'#c9a227'})];L.balok.items[0].spec='5x10x100';L.bawah.items[0].spec='2x10x120'}
  if(v=='p2'){S.A=0;S.B=0;L.atas.items=[IT('2x14x120',2,{slots:'1,9',color:'#d4a017'}),IT('2x10x120',5),IT('2x8x120',2,{slots:'4,6',color:'#c9a227'})];L.balok.items[0].spec='5x10x100';L.bawah.items[0].spec='2x10x120'}
- if(v=='dadu'){L.balok.bm='grid';L.balok.ord='twl';L.balok.items=[IT('8x10x15',6,{slots:'1,3',color:'#6b4f2a'}),IT('8x10x10',3,{slots:'2',color:'#8a6a3d'})]}
+ if(v=='dadu'){S.nailTxt='Paku biasa 2.5"';L.atas.along='Y';L.atas.items=[IT('2x10x110',9)];L.apit.on=1;L.apit.along='X';L.apit.items=[IT('2x10x110',3,{color:'#8b6a2f'})];L.balok.bm='grid';L.balok.ord='twl';L.balok.items=[IT('8x10x15',6,{slots:'pinggir',color:'#6b4f2a'}),IT('8x10x10',3,{slots:'tengah',color:'#8a6a3d'})];L.bawah.along='apit';L.bawah.items=[IT('2x10x110',3,{color:'#e6c08f'})]}
  if(v=='dadu2'){S.nailTxt='Paku biasa 2.5"';L.atas.along='Y';L.atas.items=[IT('2x10x110',9)];L.apit.on=1;L.apit.along='X';L.apit.items=[IT('2x10x110',3,{color:'#8b6a2f'})];L.balok.bm='grid';L.balok.ord='twl';L.balok.items=[IT('8x10x10',9,{color:'#6b4f2a'})];L.bawah.along='apit';L.bawah.items=[IT('2x10x110',3,{color:'#e6c08f'})]}
+ if(v=='rapat1'){L.atas.items=[IT('2x10x110',9)];L.atas.grp=2;L.atas.rm='pinggir'}
+ if(v=='rapat2'){L.atas.items=[IT('2x10x110',10)];L.atas.grp=2;L.atas.rm='semua'}
+ if(v=='kuping'){L.atas.items=[IT('2x10x110',10)];L.balok.items=[IT('5x10x100',3,{color:'#6b4f2a'})];L.balok.kup=5;L.bawah.items=[IT('2x10x110',3,{color:'#e6c08f'})]}
+ if(v=='profil'){L.balok.gv=1;L.balok.gw=2;L.balok.gd=1.5}
  if(v=='coak'){S.A=0;S.B=0;L.balok.items[0].spec='5x9x122';L.balok.coak='20,82';L.atas.items=[IT('2x9.5x100',9)];L.atas.along='X';L.bawah.items=[IT('2x9.5x100',3,{color:'#e6c08f'})]}
  ui()}
-document.addEventListener('input',e=>{const t=e.target,d=t.dataset;if(d.kop!==undefined){K[d.kop]=t.value;saveK();draw();return}if(d.p===undefined&&d.l===undefined)return;
+document.addEventListener('input',e=>{const t=e.target,d=t.dataset;if(d.t!==undefined){S.ttd[d.t]=t.type=='checkbox'?(t.checked?1:0):t.value;draw();return}if(d.tp!==undefined){S.ttd.p[d.tp][d.k]=t.value;draw();return}if(d.kop!==undefined){K[d.kop]=t.type=='number'?(parseFloat(t.value)||0):t.value;saveK();draw();return}if(d.p===undefined&&d.l===undefined)return;
  const v=t.type=='checkbox'?(t.checked?1:0):t.type=='number'?(parseFloat(t.value)||0):t.value;
  if(d.p!==undefined)S[d.p]=['A','B','az','el'].includes(d.p)?+v:v;
  else if(d.i!==undefined)S.L[d.l].items[d.i][d.k]=v;else S.L[d.l][d.k]=v;
