@@ -140,7 +140,7 @@ label.wide{grid-column:1/-1}
 <li><b>Balok dadu</b>: pilih "Blok dadu (grid)". Penempatan bisa <b>pinggir</b>, <b>tengah</b>, atau nomor blok. Pilih orientasi <b>Menyilang</b> untuk balok yang melintang.</li>
 <li><b>Papan kunci</b>: aktifkan di tab Papan kunci. Ditaruh di antara papan bawah, sejajar baris/kolom balok. Penempatan <b>pinggir</b> = baris pinggir saja; kosongkan untuk semua baris.</li>
 <li><b>Plywood</b>: isi satu papan atas selebar palet dengan Qty 1 (lihat menu Contoh).</li>
-<li><b>Paku</b>: isi jumlah titik paku untuk papan pinggir dan papan lainnya.</li></ul>
+<li><b>Paku</b>: isi jumlah titik paku untuk papan pinggir dan papan lainnya. Untuk papan tertentu saja (misalnya papan 1,2 atau 1,5,7) isi <b>Paku khusus</b>.</li></ul>
 <h3>5. Kop, catatan, tanda tangan</h3>
 <p>Tab <b>Kop surat</b>: nama, logo, alamat. Tab <b>Catatan &amp; TTD</b>: catatan, lokasi, tanggal, nama, dan jabatan. Semuanya bisa disembunyikan.</p>
 <h3>6. Pasang di HP</h3>
@@ -237,8 +237,10 @@ function chain(sg,s,pos,hor,len){const ln=`stroke="#444" stroke-width=".7"`;let 
  [...new Set(sg.flatMap(g=>[g.a,g.b]))].forEach(t=>o+=hor?`<path d="M${t*s} ${pos-3}V${pos+3}" ${ln}/>`:`<path d="M${pos-3} ${t*s}H${pos+3}" ${ln}/>`);
  sg.forEach((g,gi)=>{const l=(g.b-g.a)*s,t=f(g.b-g.a),mid=(g.a+g.b)/2*s,sm=!hor&&l<9;if(hor?l<t.length*4.8+2:l<3)return;
   o+=`<text font-size="${sm?7:9}" fill="${g.gap?'#c0392b':'#111'}" ${hor?`x="${mid}" y="${pos+12}" text-anchor="middle"`:`x="${pos+6+(sm&&gi%2?14:0)}" y="${mid+3}"`}>${t}</text>`});return o}
-function nailPts(m,r){const L=S.L[r.k];if(!L||!L.on||r.k=='balok')return[];const nn=(r.s==0||r.s==r.N-1)?(+L.nailE||0):(+L.nail||0);if(!(nn>0))return[];
- if(r.k=='kunci'){const X=r.al=='X',len=X?r.x1-r.x0:r.y1-r.y0,ins=Math.min(1,len/4),o=[];[ins,len-ins].forEach(u=>{for(let j=1;j<=nn;j++){const q2=j/(nn+1);o.push(X?[r.x0+u,r.y0+(r.y1-r.y0)*q2]:[r.x0+(r.x1-r.x0)*q2,r.y0+u])}});return o}
+function nailPts(m,r){const L=S.L[r.k];if(!L||!L.on||r.k=='balok')return[];const spx=String(L.nailX||'').split(',').map(x=>parseInt(x)).filter(x=>x>0),nn=spx.includes(r.s+1)?(+L.nailXn||3):(r.s==0||r.s==r.N-1)?(+L.nailE||0):(+L.nail||0);if(!(nn>0))return[];
+ if(r.k=='kunci'){const X=r.al=='X',len=X?r.x1-r.x0:r.y1-r.y0,ins=Math.min(1,len/4),o=[];
+  m.bx.filter(q=>q.k=='balok').forEach(q=>{const a0=Math.max(r.x0,q.x0),a1=Math.min(r.x1,q.x1),b0=Math.max(r.y0,q.y0),b1=Math.min(r.y1,q.y1);if(a1<=a0||b1<=b0)return;const u=X?(a0+a1)/2:(b0+b1)/2;for(let j=1;j<=nn;j++){const q2=j/(nn+1);o.push(X?[u,r.y0+(r.y1-r.y0)*q2]:[r.x0+(r.x1-r.x0)*q2,u])}});
+  if(o.length)return o;[ins,len-ins].forEach(u=>{for(let j=1;j<=nn;j++){const q2=j/(nn+1);o.push(X?[r.x0+u,r.y0+(r.y1-r.y0)*q2]:[r.x0+(r.x1-r.x0)*q2,r.y0+u])}});return o}
  const sup=(r.k=='atas'&&S.L.apit.on&&m.bx.some(q=>q.k=='apit'))?'apit':'balok',o=[],wide=Math.min(r.x1-r.x0,r.y1-r.y0)>30;
  m.bx.filter(q=>q.k==sup).forEach(q=>{const a0=Math.max(r.x0,q.x0),a1=Math.min(r.x1,q.x1),b0=Math.max(r.y0,q.y0),b1=Math.min(r.y1,q.y1);if(a1<=a0||b1<=b0)return;
   if(wide){const ix=Math.min(2.2,(a1-a0)/2),iy=Math.min(2.2,(b1-b0)/2);[[a0+ix,b0+iy],[a1-ix,b0+iy],[a0+ix,b1-iy],[a1-ix,b1-iy]].forEach(p=>o.push(p));return}
@@ -344,7 +346,7 @@ function sheet(){const m=model(),NL=[],LB={atas:'Papan atas',apit:'Papan apit',b
   const grid=k=='balok'&&L.bm=='grid';
   L.items.forEach((it,i)=>{const cnt=m.bx.filter(r=>r.k==k&&r.i==i).length;
    rows.push({lab:`${(L.lbl&&L.lbl.trim())||LB[k]}${L.items.length>1?' '+(i+1):''}`,val:`${String(it.spec).replace(/\s/g,'').replace(/[x×*]/gi,' x ')} = ${cnt} pcs`+(String(it.slots).trim()?` (${grid?'penempatan':'papan ke'} ${it.slots})`:'')})});
-  if(k!='balok'){const e=+L.nailE==3,o=+L.nail==3;if(e||o)NL.push(`Paku ${LB[k].toLowerCase()}: ${e&&o?'semua papan':e?'papan pinggir':'papan selain pinggir'} 3 titik`)}});
+  if(k!='balok'){const e=+L.nailE==3,o=+L.nail==3;const sx=String(L.nailX||'').split(',').map(x=>parseInt(x)).filter(x=>x>0);if(sx.length&&(+L.nailXn||3)>=3)NL.push(`Paku ${LB[k].toLowerCase()}: papan ke ${sx.join(',')} ${+L.nailXn||3} titik`);if(e||o)NL.push(`Paku ${LB[k].toLowerCase()}: ${e&&o?'semua papan':e?'papan pinggir':'papan selain pinggir'} 3 titik`)}});
  rows.push({gap:1},{txt:S.nailTxt,b:1});NL.forEach(t=>rows.push({txt:t}));
  let s=`<svg xmlns="${NS}" viewBox="0 0 800 1130" width="800" height="1130" font-family="Arial,sans-serif"><defs><pattern id="hz" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="#fff"/><line x1="0" y1="0" x2="0" y2="5" stroke="#333" stroke-width="1"/></pattern><filter id="bl" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="4"/></filter></defs><rect width="800" height="1130" fill="#fff"/>`;
  const hL=K.logoL?Math.max(30,+K.lhL||64):0,hR=K.logoR?Math.max(30,+K.lhR||64):0,hm=Math.max(54,hL,hR),dy=hm-54,wL=hL*1.7,wR=hR*1.7,kn=String(K.name||''),x0=40+(wL?wL+14:0),x1=760-(wR?wR+14:0),cxh=(x0+x1)/2,kfs=+K.nameSize>0?+K.nameSize:Math.max(12,Math.min(26,Math.floor((x1-x0)/(Math.max(kn.length,1)*.62)))),sfs=+K.subSize>0?+K.subSize:15,hasT=!!String(K.tag||'').trim();
@@ -407,7 +409,7 @@ function layerCard(k){const L=S.L[k],a=`data-l="${k}"`,A=x=>`${a} data-k="${x}"`
  ${k=='kunci'?SEL('Posisi papan kunci',A('kfollow'),+(L.kfollow??1),[[1,'Ikuti posisi balok'],[0,'Rata / atur sendiri']]):''}
  ${I('Kuping / inset dari ujung (cm)',A('kup'),L.kup||0)}
  ${I('Nama di keterangan (opsional)',A('lbl'),L.lbl||'','type=text placeholder="mis. Plywood"')}
- ${bal?'':I('Paku papan pinggir (titik)',A('nailE'),L.nailE)+I('Paku papan lain (titik)',A('nail'),L.nail)}
+ ${bal?'':I('Paku papan pinggir (titik)',A('nailE'),L.nailE)+I('Paku papan lain (titik)',A('nail'),L.nail)+I('Paku khusus: nomor papan (mis. 1,2 atau 1,5,7)',A('nailX'),L.nailX||'','type=text')+I('Paku khusus: jumlah titik',A('nailXn'),L.nailXn??3)}
  ${bal?SEL('Mode balok',A('bm'),L.bm,[['long','Memanjang'],['grid','Blok dadu (grid)']])+SEL('Urutan angka',A('ord'),L.ord,[['wtl','lebar x tinggi x panjang'],['twl','tinggi x lebar x panjang']])+(grid?SEL('Ikuti papan apit',A('gfollow'),+(L.gfollow??1),[[1,'Ya (posisi & jumlah ikut apit)'],[0,'Tidak (atur manual)']])+SEL('Arah panjang balok',A('galong'),L.galong||'apit',[['apit','Searah papan apit'],['X','Searah X'],['Y','Searah Y']])+I('Jumlah kolom X (jika manual)',A('nx'),L.nx)+I('Jumlah baris Y (jika manual)',A('ny'),L.ny)+SEL('Penomoran / arah pinggir',A('gdir'),L.gdir,[['kolom','Per kolom (X)'],['baris','Per baris (Y)']])+I('Jarak antar baris Y (cm)',A('gy'),L.gy,'type=text'):I('Coak: posisi awal (cm)',A('coak'),L.coak,'type=text placeholder="20,82"')+I('Coak: lebar',A('cw'),L.cw)+I('Coak: tinggi',A('ch'),L.ch)+SEL('Coak profil (alur tali)',A('gv'),+L.gv||0,[[0,'Tidak'],[1,'Ada']])+I('Alur tali: lebar (cm)',A('gw'),L.gw??2)+I('Alur tali: dalam (cm)',A('gd'),L.gd??1.5)):''}
  </div><small>Blok dadu: qty bisa diubah bebas; kosongkan Penempatan untuk mengisi berurutan, atau isi pinggir / tengah / nomor blok (urut per kolom atau baris); blok yang tidak terisi dikosongkan. Rapat: papan menempel tanpa celah (mis. 2 = berpasangan; pinggir = di kedua ujung; tengah = di tengah). Kuping: balok/papan dipasang masuk sekian cm dari ujung. Penempatan: nomor urut papan dari tepi X/Y awal.</small></details></div>`}
 function ttdCard(){const T=S.ttd;return `<div class="card"><label class="ck"><input type="checkbox" data-p="notesOn" ${+S.notesOn?'checked':''}><b>Catatan</b></label><div class="grid"><label class="wide">Satu baris = satu poin (nomor otomatis). Tampil di kanan keterangan palet.<textarea rows="8" data-p="notes">${esc(S.notes)}</textarea></label></div></div>
